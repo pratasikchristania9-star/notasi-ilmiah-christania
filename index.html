@@ -162,15 +162,22 @@
     <section class="card">
       <div class="input-wrap">
         <div class="label-wrap">
-          <label>Choose a scientific notation value</label>
-          <span class="hint">No typing required: select one option.</span>
+          <label for="numberInput">Enter a number</label>
+          <span class="hint">Type a decimal/integer or scientific e notation (e.g. 1.25e5).</span>
+        </div>
+        <input id="numberInput" placeholder="Enter number here" autocomplete="off" />
+      </div>
+
+      <div class="input-wrap">
+        <div class="label-wrap">
+          <label>Quick scientific options</label>
+          <span class="hint">Select one value instead of typing.</span>
         </div>
         <div id="notationOptions" style="display:grid; gap:.4rem;">
-          <label style="display:flex; gap:.45rem; align-items:center;"><input type="radio" name="notationChoice" value="1.25e5" checked>1.25 × 10^5</label>
+          <label style="display:flex; gap:.45rem; align-items:center;"><input type="radio" name="notationChoice" value="1.25e5">1.25 × 10^5</label>
           <label style="display:flex; gap:.45rem; align-items:center;"><input type="radio" name="notationChoice" value="-4.2e-3">-4.2 × 10^-3</label>
-          <label style="display:flex; gap:.45rem; align-items:center;"><input type="radio" name="notationChoice" value="9.88o">9.8 × 11</label>
+          <label style="display:flex; gap:.45rem; align-items:center;"><input type="radio" name="notationChoice" value="9.8e8">9.8 × 10^8</label>
           <label style="display:flex; gap:.45rem; align-items:center;"><input type="radio" name="notationChoice" value="3.1415e0">3.1415 × 10^0</label>
-          <label style="display:flex; gap:.45rem; align-items:center;"><input type="radio" name="notationChoice" value="3.1415e">3 × 10</label>
         </div>
       </div>
 
@@ -187,6 +194,7 @@
   </main>
 
   <script>
+    const input = document.getElementById("numberInput");
     const button = document.getElementById("checkBtn");
     const result = document.getElementById("resultArea");
     const status = document.getElementById("statusText");
@@ -213,23 +221,30 @@
     function showResult(message, type = "success") {
       result.textContent = message;
       status.textContent = type === "error"
-        ? "Please select a valid scientific notation option."
+        ? message
         : "Looks good! Number converted successfully.";
       status.classList.remove("error", "success");
       status.classList.add(type);
     }
 
-    function handleConversion() {
+    function getSelectedInput() {
+      const rawValue = input.value.trim();
+      if (rawValue) return rawValue;
       const selectedOption = document.querySelector('input[name="notationChoice"]:checked');
-      if (!selectedOption) {
-        showResult("Error: Please choose one scientific notation option.", "error");
+      return selectedOption ? selectedOption.value : "";
+    }
+
+    function handleConversion() {
+      const raw = getSelectedInput();
+      if (!raw) {
+        showResult("Error: Please type a number or pick one of the quick scientific options.", "error");
         return;
       }
 
-      const cleaned = selectedOption.value.trim();
+      const cleaned = raw.replace(/[ ,]/g, "");
       const parsed = Number(cleaned);
       if (Number.isNaN(parsed) || !Number.isFinite(parsed)) {
-        showResult("Error: Selected value is not a valid number.", "error");
+        showResult("Error: Please enter a valid finite number (e.g. 1.25e5, 0.003, 523).", "error");
         return;
       }
 
@@ -242,6 +257,7 @@
     }
 
     button.addEventListener("click", handleConversion);
+    input.addEventListener("keydown", (e) => { if (e.key === "Enter") handleConversion(); });
   </script>
 </body>
 </html>
