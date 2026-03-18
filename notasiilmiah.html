@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Scientific Notation Checker</title>
+  <style>
+    :root {
+      --bg: #0d1117;
+      --card: #141b26;
+      --text: #eaf0ff;
+      --muted: #97a4c5;
+      --accent: #4f8cff;
+      --success: #26d47a;
+      --error: #ff6c6c;
+      --border: #263248;
+      --shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+      --radius: 16px;
+      --font: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      min-height: 100vh;
+      font-family: var(--font);
+      background: radial-gradient(circle at 20% 0%, #182540 0%, #0a0f18 42%, #090b11 100%);
+      color: var(--text);
+      display: grid;
+      place-items: center;
+      padding: 1rem;
+    }
+    .page {
+      width: min(100%, 740px);
+      background: linear-gradient(180deg, rgba(20, 27, 38, 0.9), rgba(10, 14, 23, 0.98));
+      border: 1px solid rgba(255,255,255,0.05);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      padding: 1.25rem;
+      backdrop-filter: blur(4px);
+    }
+    .header {
+      margin-bottom: 1rem;
+    }
+    .header h1 {
+      font-size: clamp(1.4rem, 4vw, 2rem);
+      letter-spacing: -0.02em;
+    }
+    .header p {
+      color: var(--muted);
+      margin-top: 0.3rem;
+      line-height: 1.45;
+      font-size: 0.95rem;
+    }
+    .card {
+      background: #0f1728;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1rem;
+      display: grid;
+      gap: .8rem;
+    }
+    .label-wrap {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: .5rem;
+    }
+    .label-wrap label {
+      font-weight: 600;
+      font-size: .9rem;
+      color: #dce6ff;
+    }
+    .hint {
+      font-size: .75rem;
+      color: #94a5ce;
+    }
+    .input-wrap {
+      display: grid;
+      gap: .45rem;
+    }
+    input[type="text"] {
+      width: 100%;
+      border-radius: 10px;
+      border: 1px solid #334361;
+      background: #0b1223;
+      color: #f7f9ff;
+      padding: 0.72rem 0.85rem;
+      font-size: 1rem;
+      outline: none;
+      transition: border-color .2s ease, box-shadow .2s ease;
+      letter-spacing: 0.01em;
+    }
+    input[type="text"]:focus {
+      border-color: #5f8dff;
+      box-shadow: 0 0 0 3px rgba(79,140,255,0.18);
+    }
+    .btn-wrap {
+      display: flex;
+      justify-content: flex-end;
+    }
+    button {
+      border: none;
+      border-radius: 10px;
+      background: linear-gradient(120deg, #3f7bff, #1f58f4);
+      color: white;
+      font-weight: 600;
+      cursor: pointer;
+      padding: 0.65rem 1rem;
+      font-size: 0.95rem;
+      transition: transform .15s ease, filter .15s ease, box-shadow .15s ease;
+      box-shadow: 0 6px 14px rgba(31,88,244,0.35);
+    }
+    button:hover { transform: translateY(-1px); filter: brightness(1.05); }
+    button:active { transform: translateY(0); }
+    .result {
+      margin-top: .4rem;
+      border-radius: 10px;
+      border: 1px solid #2c3e5e;
+      background: #0a131f;
+      min-height: 3.1rem;
+      display: grid;
+      align-items: center;
+      padding: .75rem .8rem;
+      font-size: 0.96rem;
+      line-height: 1.4;
+      color: #c5d2ff;
+    }
+    .result strong { color: #fff; }
+    .status {
+      margin-top: .3rem;
+      min-height: 1rem;
+      font-size: .83rem;
+      color: #abb8d4;
+    }
+    .status.error { color: var(--error); }
+    .status.success { color: var(--success); }
+    .example {
+      margin-top: .4rem;
+      color: #8ea2d4;
+      font-size: .82rem;
+    }
+    .footer {
+      margin-top: .9rem;
+      color: #88a0cd;
+      font-size: .8rem;
+      text-align: center;
+    }
+    @media (max-width: 640px) {
+      .page { padding: 1rem; }
+      .btn-wrap { justify-content: stretch; }
+      button { width: 100%; }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <section class="header">
+      <h1>Scientific Notation Checker</h1>
+      <p>Enter any number (large or tiny) and see the correct scientific notation instantly. Supports decimals, integers, and negative values.</p>
+    </section>
+
+    <section class="card">
+      <div class="input-wrap">
+        <div class="label-wrap">
+          <label>Choose a scientific notation value</label>
+          <span class="hint">No typing required: select one option.</span>
+        </div>
+        <div id="notationOptions" style="display:grid; gap:.4rem;">
+          <label style="display:flex; gap:.45rem; align-items:center;"><input type="radio" name="notationChoice" value="1.25e5" checked>1.25 × 10^5</label>
+          <label style="display:flex; gap:.45rem; align-items:center;"><input type="radio" name="notationChoice" value="-4.2e-3">-4.2 × 10^-3</label>
+          <label style="display:flex; gap:.45rem; align-items:center;"><input type="radio" name="notationChoice" value="9.88o">9.8 × 11</label>
+          <label style="display:flex; gap:.45rem; align-items:center;"><input type="radio" name="notationChoice" value="3.1415e0">3.1415 × 10^0</label>
+          <label style="display:flex; gap:.45rem; align-items:center;"><input type="radio" name="notationChoice" value="3.1415e">3 × 10</label>
+        </div>
+      </div>
+
+      <div class="btn-wrap">
+        <button id="checkBtn" type="button">Check / Convert</button>
+      </div>
+
+      <div class="result" id="resultArea">Your converted scientific notation appears here.</div>
+      <div class="status" id="statusText"></div>
+      <div class="example">Output style: <code>1.25 × 10^5</code> (exponential form also shown as <code>1.25e5</code>).</div>
+    </section>
+    <div class="footer">Christania Tiara Pratasik - 241011060002</div>
+    <div class="footer">Information System - Class A</div>
+  </main>
+
+  <script>
+    const button = document.getElementById("checkBtn");
+    const result = document.getElementById("resultArea");
+    const status = document.getElementById("statusText");
+
+    function toScientificNotation(value) {
+      if (!Number.isFinite(value)) return null;
+      if (value === 0) {
+        return { normalized: "0.00 × 10^0", exponential: "0e0" };
+      }
+      const sign = value < 0 ? -1 : 1;
+      const absVal = Math.abs(value);
+      const exponent = Math.floor(Math.log10(absVal));
+      const mantissa = absVal / Math.pow(10, exponent);
+      const niceMantissa = Number(mantissa.toFixed(12));
+      let formattedMantissa = niceMantissa.toFixed(2);
+      if (formattedMantissa.endsWith(".00")) {
+        formattedMantissa = Number(formattedMantissa).toString();
+      }
+      const normalized = `${sign < 0 ? "-" : ""}${formattedMantissa} × 10^${exponent}`;
+      const exponential = `${sign < 0 ? "-" : ""}${formattedMantissa}e${exponent}`;
+      return { normalized, exponential };
+    }
+
+    function showResult(message, type = "success") {
+      result.textContent = message;
+      status.textContent = type === "error"
+        ? "Please select a valid scientific notation option."
+        : "Looks good! Number converted successfully.";
+      status.classList.remove("error", "success");
+      status.classList.add(type);
+    }
+
+    function handleConversion() {
+      const selectedOption = document.querySelector('input[name="notationChoice"]:checked');
+      if (!selectedOption) {
+        showResult("Error: Please choose one scientific notation option.", "error");
+        return;
+      }
+
+      const cleaned = selectedOption.value.trim();
+      const parsed = Number(cleaned);
+      if (Number.isNaN(parsed) || !Number.isFinite(parsed)) {
+        showResult("Error: Selected value is not a valid number.", "error");
+        return;
+      }
+
+      const scientific = toScientificNotation(parsed);
+      if (!scientific) {
+        showResult("Error: Unable to convert this value.", "error");
+        return;
+      }
+      showResult(`Scientific notation: ${scientific.normalized} (≡ ${scientific.exponential})`, "success");
+    }
+
+    button.addEventListener("click", handleConversion);
+  </script>
+</body>
+</html>
